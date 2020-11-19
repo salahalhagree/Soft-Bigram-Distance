@@ -1,0 +1,156 @@
+//----------------Soft Bigram Distance --------------------------------------------------
+            DateTime dt1 = new DateTime();
+            dt1 = DateTime.Now;
+            progressBar1.Value = 0;
+            double Cwq;
+            progressBar1.Maximum = dataGridView4.Rows.Count - 1;
+            //-------
+            for (int a = 0; a < dataGridView4.RowCount - 1; a++)
+            {
+                Cwq = 0;
+                listBox1.Items.Clear();
+                listBox2.Items.Clear();
+                string s = "-" + Convert.ToString(dataGridView4.Rows[a].Cells[1].Value.ToString());
+                string t = "-" + Convert.ToString(dataGridView4.Rows[a].Cells[2].Value.ToString());
+                int n = s.Length;
+                int m = t.Length;
+                for (int i = 0; i < n - 1; i++)
+                {
+                    listBox1.Items.Add(s.Substring(i, 2));
+               }
+                for (int i = 0; i < n - 1; i++)
+                {
+                    x[i] = Convert.ToString(listBox1.Items[i]);
+                }
+                for (int i = 0; i < m - 1; i++)
+                {
+                    listBox2.Items.Add(t.Substring(i, 2));
+                }
+                for (int i = 0; i < m - 1; i++)
+                {
+                    y[i] = Convert.ToString(listBox2.Items[i]);
+                }
+                //----------------------------------------
+                   double[,] LevenshteinArabic = new double[n + 1, m + 1];   ////Soft Bigram Distance
+                // Step 1
+                if (n == 0)
+                {
+                    Console.WriteLine(m + "--------N----");
+                }
+                if (m == 0)
+                {
+                    Console.WriteLine(n + "------M------");
+                }
+                // Step 2
+                for (int i = 0; i <= n; i++)
+                {
+                    LevenshteinArabic[i, 0] = i;  ////Soft Bigram Distance
+                }
+                for (int j = 0; j <= m; j++)
+                {
+                     LevenshteinArabic[0, j] = j;  ////Soft Bigram Distance
+                }
+                double cost1 = 1;
+                double cost2 = 1;
+                int n1 = listBox1.Items.Count;
+                int m1 = listBox2.Items.Count;
+                for (int i = 1; i <= n1; i++)
+                {
+                    dataG.Rows.Add();
+                    dataG.Rows[i - 1].Cells[0].Value = x[i - 1];
+                    for (int j = 1; j <= m1; j++)
+                    {
+                        string s1 = x[i - 1];
+                        string s2 = y[j - 1];
+                        string s11 = "";
+                        string s12 = "";
+                        string s21 = "";
+                        string s22 = "";
+                        if (s1 != null)
+                        {
+                            s12 = s1.Substring(1, 1);
+                            s11 = s1.Substring(0, 1);
+                        }
+                        if (s2 != null)
+                        {
+                            s21 = s2.Substring(0, 1);
+                            s22 = s2.Substring(1, 1);
+                        }
+                        //-----------------------------------
+                        dataG.Columns[j].HeaderText = y[j - 1];
+                        if (x[i - 1] == y[j - 1]) Cwq = Cwq + 1;
+                        //-------------------  transposition and  substitution operations----------------
+                        if ((s11 == s21) && (s12 == s22))
+                        {
+                            //-------------W1
+                            cost1 = Convert.ToDouble(textcost1.Text);
+                        }
+                        else if ((s11 != s21) && (s12 != s22) && (s11 != s22) && (s12 != s21))
+                        {
+                            //-------------W2
+                             cost1 = Convert.ToDouble(textcost2.Text);//1;
+                            //-----------------------------------------------
+                        }
+                        else if ((s11 == s22) && (s12 == s21))
+                        {
+                            //-------------W3
+                            cost1 = Convert.ToDouble(textcost3.Text);//0.10;
+                        }
+                        else if ((s11 != s21) && (s12 == s22))
+                        {
+                            //-------------W4
+                            cost1 = Convert.ToDouble(textcost4.Text);
+                        }
+                        else if ((s11 == s21) && (s12 != s22))
+                        {
+                            //-------------W5
+                            cost1 = Convert.ToDouble(textcost5.Text);//0.10;
+                            if (((i == 1) && (j == 1)))     //Õ«· Â«’… „‰ «Ã· Ã⁄·Â« ’›—
+                            {
+                                cost1 = 1;
+                            }
+                        }
+                        //------------- 
+                        else if ((s11 != s22) && (s12 == s21))  
+                        {
+                            //-------------W6
+                            cost1 = Convert.ToDouble(textcost6.Text);//W6    0.12;
+                            //-------------W8------------- deletion and insertion operations
+                            cost2 = Convert.ToDouble(textcost8.Text);//W8   0.2;
+                        }
+                        else if ((s11 == s22) && (s12 != s21))
+                        {
+                            //-------------W7
+                            cost1 = Convert.ToDouble(textcost7.Text); //W7   0.12;
+                            //-------------W9------------- deletion and insertion operations
+                            cost2 = Convert.ToDouble(textcost9.Text);// W9    0.2;
+                        }
+                        else
+                        {
+                            cost1 = 1;
+                            cost2 = 1;        
+                        }
+                        //----------------------------------------------------
+                        LevenshteinArabic[i, j] = Math.Min(Math.Min(LevenshteinArabic[i - 1, j] + cost2, LevenshteinArabic[i, j - 1] + cost2), LevenshteinArabic[i - 1, j - 1] + (cost1));
+                         //-----------------------------------
+                        dataG.Rows[i - 1].Cells[j].Value = LevenshteinArabic[i, j];// Math.Min(Math.Min(Levenshtein1[i - 1, j] + cost1, Levenshtein1[i, j - 1] + cost1), Levenshtein1[i - 1, j - 1] + (cost1));
+                    }
+                }
+                dataG.Rows.Clear();
+                progressBar1.Value += 1;
+                if (progressBar1.Value >= progressBar1.Maximum)
+                {
+                  progressBar1.Value = 0;
+                }
+                //-----------------
+                dataGridView4.Columns[10].HeaderText = "Distance Soft Bigram Distance";
+                dataGridView4.Columns[11].HeaderText = " Similarity Soft Bigram Distance";
+                dataGridView4.Rows[a].Cells[10].Value = LevenshteinArabic[n1, m1];
+                dataGridView4.Rows[a].Cells[11].Value = 1 - (LevenshteinArabic[n1, m1] / Math.Max(n1, m1));
+             }
+            //‰Â«Ì… «·«Ã—««¡
+            DateTime dt2 = new DateTime();
+            dt2 = DateTime.Now;
+            TimeSpan tss = dt2 - dt1;
+            textBox8.Text = Convert.ToString(tss);
+            //------------------END -------Proposed  Soft Bigram Distance (Soft-Bidist)---------------
